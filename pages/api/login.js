@@ -16,8 +16,10 @@ const handler = async (req, res) => {
     );
 
     const data = await resp.json();
-    console.log(data);
+    return res.send(JSON.stringify(data))
+    
   } catch (error) {
+    
     console.log(error);
   }
 };

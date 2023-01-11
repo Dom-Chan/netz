@@ -1,38 +1,51 @@
-import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "@next/font/google";
-import styles from "../styles/Home.module.css";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import Cookies from "js-cookie";
 
-const inter = Inter({ subsets: ["latin"] });
+export default function Login({}) {
+  const router = useRouter();
+  const [userInput, setUsername] = useState();
+  const [passInput, setPassword] = useState();
+  const [isErr, setIsErr] = useState(false);
 
-// export const getStaticProps = async() => {
-//   const url = "/api/hello"
-//   const res = await fetch(url)
-//   const data = await res.json()
-//   //console.log(data)
+  const handleLogin = async () => {
+    const creds = { username: userInput, password: passInput };
+    const options = {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(creds),
+    };
 
-//   return {
-//     props: {netz: data}
-//   }
-// }
+    const result = await fetch("/api/login", options);
+    const status = await result.json();
 
-export default function Home({}) {
+    if (status.message) {
+      //if credentials are INVALID
+      setIsErr(true);
+    } else {
+      //if login is SUCCESSFUL
+      Cookies.set("loggedin", true);
+      router.push("/home");
+    }
+  };
 
-  const creds = { username: "a", password : "bar"}
-
-  const options = {
-    method: "POST",
-    headers: {
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(creds)
-  }
-  
-  fetch("/api/hello", options);
-  
   return (
     <>
-      LOGIN PAGE
+      <input
+        type="text"
+        placeholder="Username"
+        onChange={(e) => setUsername(e.target.value)}
+      ></input>
+      <input
+        type="text"
+        placeholder="Password"
+        onChange={(e) => setPassword(e.target.value)}
+      ></input>
+      <button onClick={handleLogin}>LOG IN</button>
+
+      {isErr && <p>INVALID CREDENTIALS</p>}
     </>
   );
 }
